@@ -227,4 +227,4 @@ function serializeResponseDailyWeather(data) {
     id: Math.random(),
   }));
   return newArray;
-}
+} 
