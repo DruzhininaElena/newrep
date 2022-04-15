@@ -26,13 +26,29 @@
             <div class="navbar-nav">
               <a class="nav-link" href="#">Прогноз на неделю</a>
               <a class="nav-link" href="#">Прогноз на месяц</a>
-              <a class="nav-link" href="#">Избранное</a>
+              <router-link :to="{ path: '/favourite' }">
+                <a class="nav-link" href="#" v-show="authorized">Избранное</a>
+              </router-link>
               <router-link :to="{ path: '/cities' }">
                 <a class="nav-link" @click="getCurrentRegion" href="#"
                   >Города региона
                 </a>
               </router-link>
             </div>
+          </div>
+          <div class="navbar-nav d-flex align-items-center" v-if="!authorized">
+            <LogInIcon size="1.1x"></LogInIcon>
+            <router-link :to="{ path: '/registration' }">
+              <a class="nav-link" href="#">Регистрация</a>
+            </router-link>
+            <span>|</span>
+            <router-link :to="{ path: '/autorization' }">
+              <a class="nav-link" href="#">Вход</a>
+            </router-link>
+          </div>
+          <div class="navbar-nav d-flex align-items-center" v-else>
+            <LogOutIcon size="1.1x"></LogOutIcon>
+            <a @click="onLogOut" class="nav-link" href="#">Выйти</a>
           </div>
         </div>
       </nav>
@@ -41,12 +57,31 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
+import { LogOutIcon, LogInIcon } from "vue-feather-icons";
 
 export default {
   name: "NavMenu",
+  components: {
+    LogOutIcon,
+    LogInIcon,
+  },
+  computed: {
+    ...mapGetters("auth", ["authorized"]),
+  },
   methods: {
     ...mapActions("weather", ["getCurrentRegion"]),
+    ...mapActions("auth", ["logout"]),
+    ...mapMutations("auth", ["SET_IS_AUTHORIZED"]),
+    onLogOut() {
+      // this.logout();
+      this.SET_IS_AUTHORIZED(false);
+      localStorage.removeItem("authorization");
+      localStorage.removeItem("authToken");
+      if (this.$route.path === "/favourite") {
+        this.$router.push("/");
+      }
+    }
   },
 };
 </script>
@@ -61,5 +96,9 @@ a {
 .header__logo {
   width: 30px;
   height: 30px;
+}
+.autorization {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

@@ -30,7 +30,7 @@ const weatherStore = {
     },
     getCitiesOfCurrentRegion({ citiesOfCurrentRegion }) {
       return citiesOfCurrentRegion;
-    }
+    },
   },
   mutations: {
     SET_CURRENT_GEOLOCATION(state, coords) {
@@ -51,9 +51,11 @@ const weatherStore = {
     },
     SET_CITIES_OF_CURRENT_REGION(state, cities) {
       state.citiesOfCurrentRegion = cities;
+      console.log(state.citiesOfCurrentRegion);
     },
     SET_WEATHER_DATA_IN_CITIES_OF_REGION(state, data) {
       state.weatherInCitiesOfRegion.push(serializeResponseCurrentWeather(data));
+      console.log(state.weatherInCitiesOfRegion);
     },
   },
   actions: {
@@ -67,11 +69,30 @@ const weatherStore = {
         };
         commit("SET_CURRENT_GEOLOCATION", coords);
         dispatch("fetchWeatherData", {
-          url: `${state.apiBase}weather?&lat=${state.currentLat}&lon=${state.currentLong}&units=metric&APPID=${state.apiKey}&units=metric&lang=ru`,
+          url: `${state.apiBase}weather`,
+          params: {
+            params: {
+              lat: state.currentLat,
+              lon: state.currentLong,
+              units: "metric",
+              APPID: state.apiKey,
+              lang: "ru",
+            },
+          },
           mutation: "SET_WEATHER_DATA",
         });
         dispatch("fetchWeatherData", {
-          url: `${state.apiBase}onecall?&lat=${state.currentLat}&lon=${state.currentLong}&exclude=hourly,alerts,minutely&APPID=${state.apiKey}&units=metric&lang=ru`,
+          url: `${state.apiBase}onecall`,
+          params: {
+            params: {
+              lat: state.currentLat,
+              lon: state.currentLong,
+              exclude: "hourly,alerts,minutely",
+              units: "metric",
+              APPID: state.apiKey,
+              lang: "ru",
+            },
+          },
           mutation: "SET_DAILY_WEATHER_DATA",
         });
       }
@@ -80,21 +101,44 @@ const weatherStore = {
         console.log(error);
         alert("не уалось получить текущие координаты");
         commit("SET_CURRENT_GEOLOCATION", { latitude: 0, longitude: 0 });
-        dispatch(
-          "fetchWeatherData",
-          `${state.apiBase}onecall?&lat=0&lon=0&exclude=hourly,alerts,minutely&APPID=${state.apiKey}&units=metric&lang=ru`
-        );
+        dispatch("fetchWeatherData", {
+          url: `${state.apiBase}weather`,
+          params: {
+            params: {
+              lat: 0,
+              lon: 0,
+              units: "metric",
+              APPID: state.apiKey,
+              lang: "ru",
+            },
+          },
+          mutation: "SET_WEATHER_DATA",
+        });
+        dispatch("fetchWeatherData", {
+          url: `${state.apiBase}onecall`,
+          params: {
+            params: {
+              lat: 0,
+              lon: 0,
+              exclude: "hourly,alerts,minutely",
+              units: "metric",
+              APPID: state.apiKey,
+              lang: "ru",
+            },
+          },
+          mutation: "SET_DAILY_WEATHER_DATA",
+        });
       }
     },
-    async fetchWeatherData({ commit }, payload) {
+    async fetchWeatherData({ commit }, { url, params, mutation }) {
       try {
-        const response = await axios.get(payload.url);
-        commit(payload.mutation, response.data);
+        const response = await axios.get(url, params);
+        commit(mutation, response.data);
         commit("SET_ERROR", false);
       } catch (error) {
         console.log(error);
         commit("SET_ERROR", true);
-        commit(payload.mutation, {});
+        commit(mutation, {});
       }
     },
     getCurrentRegion({ commit, state, dispatch }) {
@@ -111,7 +155,15 @@ const weatherStore = {
       commit("SET_CITIES_OF_CURRENT_REGION", citiesOfCurrentRegion);
       citiesOfCurrentRegion.forEach((city) => {
         dispatch("fetchWeatherData", {
-          url: `${state.apiBase}weather?q=${city.name}&units=metric&APPID=${state.apiKey}&units=metric&lang=ru`,
+          url: `${state.apiBase}weather`,
+          params: {
+            params: {
+              q: city.name,
+              units: "metric",
+              APPID: state.apiKey,
+              lang: "ru",
+            },
+          },
           mutation: "SET_WEATHER_DATA_IN_CITIES_OF_REGION",
         });
       });
@@ -214,6 +266,9 @@ function serializeResponseCurrentWeather(data) {
       timeConverter(data.sys.sunrise),
       timeConverter(data.sys.sunset)
     ),
+    lat: data.coord.lat,
+    lon: data.coord.lon,
+    id: weatherStore.state.weatherInCitiesOfRegion.length + 1,
   };
   return newWeatherData;
 }
@@ -227,4 +282,4 @@ function serializeResponseDailyWeather(data) {
     id: Math.random(),
   }));
   return newArray;
-} 
+}

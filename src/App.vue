@@ -2,38 +2,28 @@
   <div id="app">
     <NavMenu />
     <router-view></router-view>
-    <!-- <WeatherInCity />
-    <CitiesList /> -->
   </div>
 </template>
 
 <script>
 import NavMenu from "./components/NavMenu.vue";
-// import WeatherInCity from "./components/WeatherInCity.vue";
-// import CitiesList from "./components/CitiesList.vue"
- 
-import { mapActions } from 'vuex'
+
+import { mapActions } from "vuex";
 
 export default {
   name: "App",
   components: {
     NavMenu,
-    // WeatherInCity,
-    // CitiesList,
   },
-  data: () => ({
-  
-  }),
-  computed: {
-  },
+  data: () => ({}),
+  computed: {},
   methods: {
-    ...mapActions('weather', ['getCurrentGeolocation']),
-    
+    ...mapActions("weather", ["getCurrentGeolocation"]),
+    ...mapActions("favourite", ["fetchFavouriteCities"]),
   },
   created() {
     this.getCurrentGeolocation();
-  }
-  
+  },
 };
 </script>
 
