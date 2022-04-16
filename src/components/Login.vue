@@ -1,17 +1,20 @@
 <template>
   <div class="authorization container">
+    <AlertMsg
+      :msg="alertMsgError"
+      :msg-color="colorMsgError"
+      v-show="showAlertError"
+    />
     <div class="form-card card ml-auto">
       <div class="card-body">
         <h4 class="authorization__title card-title">Авторизация</h4>
-        <form name="loginForm">
+        <form @submit.prevent="onSubmit" name="loginForm">
           <div class="form-group mt-2">
             <input
-              type="email"
               class="form-control"
               placeholder="Введите email"
-              data-required="email"
-              data-invalid-message="Пожалуйста используйте валидный email example@example.com"
               v-model="email"
+              required
             />
           </div>
           <div class="form-group mt-2">
@@ -19,8 +22,8 @@
               type="password"
               class="form-control"
               placeholder="пароль"
-              data-required="password"
               v-model="password"
+              required
             />
           </div>
           <div class="to-registration d-flex justify-content-between mt-2">
@@ -30,7 +33,6 @@
             </router-link>
           </div>
           <button
-            @click.prevent="onSubmit"
             type="submit"
             class="btn btn-primary mt-2"
           >
@@ -44,13 +46,17 @@
 
 <script>
 import { mapActions, mapMutations, mapGetters } from "vuex";
+import AlertMsg from "./AlertMsg.vue";
 
 export default {
   name: "AuthorizationForm",
-  components: {},
+  components: { AlertMsg },
   data: () => ({
     email: "",
     password: "",
+    showAlertError: false,
+    alertMsgError: "Ошибка! Попробуйте ещё раз",
+    colorMsgError: "background-color: rgb(238, 175, 175)",
   }),
   computed: {
     ...mapGetters("auth", ["authorized", "getAuthToken"]),
@@ -75,9 +81,11 @@ export default {
         this.getCurrentRegion();
         this.SET_AUTH_TOKEN(this.getAuthToken);
         this.fetchFavouriteCities();
-        // notify({ msg: 'Login success', className: 'alert-success' });
       } catch (err) {
-        // notify({ mas: 'Login faild', className: 'alert-danger' });
+        this.showAlertError = true;
+        setTimeout(() => {
+          this.showAlertError = false;
+        }, 2000);
       }
       
     },

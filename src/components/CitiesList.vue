@@ -1,6 +1,6 @@
 <template>
   <div class="cities-list container">
-    <h1>{{ getCurrentRegion }}</h1>
+    <h1>{{ currentRegion }} </h1>
     <h5>Текущие дата и время: {{ time }}</h5>
     <b-list-group>
       <CitiesItem
@@ -29,7 +29,7 @@ export default {
   computed: {
     ...mapGetters("weather", [
       "getWeatherInCitiesOfRegion",
-      "getCurrentRegion",
+      "currentRegion",
     ]),
   },
 };

@@ -53,8 +53,10 @@ const authStore = {
         commit("SET_SOCKET_TOKEN", socketToken);
         commit("SET_USER_ID", userId);
         localStorage.setItem("authToken", authToken);
+        return response.data;
       } catch (err) {
         console.log(err);
+        return Promise.reject(err);
       }
     },
     async register({ state }, { name, email, password }) {

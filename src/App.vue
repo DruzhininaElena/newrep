@@ -18,11 +18,11 @@ export default {
   data: () => ({}),
   computed: {},
   methods: {
-    ...mapActions("weather", ["getCurrentGeolocation"]),
-    ...mapActions("favourite", ["fetchFavouriteCities"]),
+    ...mapActions("weather", ["getCurrentGeolocation", "getCurrentRegion"]),
   },
   created() {
     this.getCurrentGeolocation();
+    this.getCurrentRegion()
   },
 };
 </script>

@@ -11,9 +11,9 @@ const weatherStore = {
     weatherData: {},
     dailyweatherData: [],
     isError: false,
-    currentRegion: "",
+    currentRegion: JSON.parse(localStorage.getItem("region")) || "",
     citiesOfCurrentRegion: "",
-    weatherInCitiesOfRegion: [],
+    weatherInCitiesOfRegion: JSON.parse(localStorage.getItem("city")) || [],
   },
   getters: {
     getWeatherData({ weatherData }) {
@@ -22,7 +22,7 @@ const weatherStore = {
     dailyWeather({ dailyweatherData }) {
       return dailyweatherData;
     },
-    getCurrentRegion({ currentRegion }) {
+    currentRegion({ currentRegion }) {
       return currentRegion;
     },
     getWeatherInCitiesOfRegion({ weatherInCitiesOfRegion }) {
@@ -48,6 +48,8 @@ const weatherStore = {
     },
     SET_CURRENT_REGION(state, region) {
       state.currentRegion = region;
+      console.log(state.currentRegion);
+      localStorage.setItem("region", JSON.stringify(region))
     },
     SET_CITIES_OF_CURRENT_REGION(state, cities) {
       state.citiesOfCurrentRegion = cities;
@@ -56,6 +58,7 @@ const weatherStore = {
     SET_WEATHER_DATA_IN_CITIES_OF_REGION(state, data) {
       state.weatherInCitiesOfRegion.push(serializeResponseCurrentWeather(data));
       console.log(state.weatherInCitiesOfRegion);
+      localStorage.setItem("city", JSON.stringify(state.weatherInCitiesOfRegion))
     },
   },
   actions: {
@@ -148,6 +151,7 @@ const weatherStore = {
         (city) => city.name === currentCityName
       );
       let currentRegion = currentCityInfo[0].subject;
+      
       commit("SET_CURRENT_REGION", currentRegion);
       let citiesOfCurrentRegion = citiesInfo.filter(
         (city) => city.subject === currentRegion
@@ -167,6 +171,8 @@ const weatherStore = {
           mutation: "SET_WEATHER_DATA_IN_CITIES_OF_REGION",
         });
       });
+      console.log(state.weatherInCitiesOfRegion)
+      
     },
   },
 };

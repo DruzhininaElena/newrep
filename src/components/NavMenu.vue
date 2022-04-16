@@ -36,12 +36,12 @@
               </router-link>
             </div>
           </div>
-          <div class="navbar-nav d-flex align-items-center" v-if="!authorized">
+          <div class="navbar-nav d-flex align-items-center " v-if="!authorized">
             <LogInIcon size="1.1x"></LogInIcon>
             <router-link :to="{ path: '/registration' }">
               <a class="nav-link" href="#">Регистрация</a>
             </router-link>
-            <span>|</span>
+            <!-- <span>|</span> -->
             <router-link :to="{ path: '/autorization' }">
               <a class="nav-link" href="#">Вход</a>
             </router-link>
@@ -72,13 +72,15 @@ export default {
   methods: {
     ...mapActions("weather", ["getCurrentRegion"]),
     ...mapActions("auth", ["logout"]),
+    ...mapActions("favourite", ["fetchFavouriteCities"]),
     ...mapMutations("auth", ["SET_IS_AUTHORIZED"]),
     onLogOut() {
       // this.logout();
       this.SET_IS_AUTHORIZED(false);
       localStorage.removeItem("authorization");
       localStorage.removeItem("authToken");
-      if (this.$route.path === "/favourite") {
+      localStorage.removeItem("city");
+      if (this.$route.path !== "/") {
         this.$router.push("/");
       }
     }

@@ -6,7 +6,7 @@
       <div class="weather-in-city__body card-body">
         <div v-show="authorized">
           <div class="d-flex justify-content-end">
-            <b-button @click="addCityToFavourite" variant="light" size="sm"
+            <b-button @click="addCityToFavourite" variant="light" size="sm" class="weather-in-city__favourite-btn"
               >В избранное</b-button
             >
           </div>
@@ -99,12 +99,13 @@ export default {
     width: 100%;
   }
 }
-.weather-in-city__favorites {
-  font-size: 0.75rem;
+@media (max-width: 576px) {
+  .weather-in-city__favourite-btn {
+    width: 65px;
+    font-size: 8px;
+  }
 }
-.favorites__label {
-  margin-left: 5px;
-}
+
 .weather-in-city__body {
   color: white;
   background-image: url("../assets/sky.jpg");
