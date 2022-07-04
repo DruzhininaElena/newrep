@@ -9,7 +9,7 @@ const weatherStore = {
     apiBase: "https://api.openweathermap.org/data/2.5/",
     apiKey: "fdac93ce7e28f93543a70e9873a523cb",
     weatherData: {},
-    dailyweatherData: [],
+    dailyWeatherData: [],
     isError: false,
     weatherInCitiesOfRegion: JSON.parse(localStorage.getItem("city")) || [],
   },
@@ -17,8 +17,8 @@ const weatherStore = {
     getWeatherData({ weatherData }) {
       return weatherData;
     },
-    dailyWeather({ dailyweatherData }) {
-      return dailyweatherData;
+    dailyWeather({ dailyWeatherData }) {
+      return dailyWeatherData;
     },
     getWeatherInCitiesOfRegion({ weatherInCitiesOfRegion }) {
       return weatherInCitiesOfRegion;
@@ -48,7 +48,7 @@ const weatherStore = {
       state.isError = value;
     },
     SET_DAILY_WEATHER_DATA(state, data) {
-      state.dailyweatherData = serializeResponseDailyWeather(data);
+      state.dailyWeatherData = serializeResponseDailyWeather(data);
     },
   },
   actions: {
@@ -79,7 +79,7 @@ const weatherStore = {
       function error(error) {
         console.log(error);
         alert("не уалось получить текущие координаты");
-        commit("SET_CURRENT_GEOLOCATION", { latitude: 0, longitude: 0 });
+        commit("SET_CURRENT_GEOLOCATION", { lat: 0, lon: 0 });
         dispatch("fetchWeatherData", {
           url: `${state.apiBase}weather`,
           params: {
@@ -105,7 +105,6 @@ const weatherStore = {
           localStorage.setItem("lat", JSON.stringify(response.data.coord.lat))
           localStorage.setItem("lon", JSON.stringify(response.data.coord.lon))
         }
-        console.log(response.data.name)
         if (response.data.name) {
           commit("SET_CURRENT_CITY_NAME", response.data.name);
           localStorage.setItem("city-name", response.data.name)
