@@ -20,9 +20,9 @@ export default {
   methods: {
     ...mapActions("weather", ["getCurrentGeolocation", "getCurrentRegion"]),
   },
-  created() {
+  mounted() {
     this.getCurrentGeolocation();
-    this.getCurrentRegion()
+    this.getCurrentRegion();
   },
 };
 </script>

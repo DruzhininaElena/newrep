@@ -1,18 +1,16 @@
 import axios from "axios";
-import citiesInfo from "../citiesData/cities";
 
 const weatherStore = {
   namespaced: true,
   state: {
-    currentLat: "",
-    currentLong: "",
+    currentLat: localStorage.getItem("lat") || 0,
+    currentLong: localStorage.getItem("lon") || 0,
+    currentCityName: localStorage.getItem("city-name") || "",
     apiBase: "https://api.openweathermap.org/data/2.5/",
     apiKey: "fdac93ce7e28f93543a70e9873a523cb",
     weatherData: {},
     dailyweatherData: [],
     isError: false,
-    currentRegion: JSON.parse(localStorage.getItem("region")) || "",
-    citiesOfCurrentRegion: "",
     weatherInCitiesOfRegion: JSON.parse(localStorage.getItem("city")) || [],
   },
   getters: {
@@ -22,20 +20,26 @@ const weatherStore = {
     dailyWeather({ dailyweatherData }) {
       return dailyweatherData;
     },
-    currentRegion({ currentRegion }) {
-      return currentRegion;
-    },
     getWeatherInCitiesOfRegion({ weatherInCitiesOfRegion }) {
       return weatherInCitiesOfRegion;
     },
-    getCitiesOfCurrentRegion({ citiesOfCurrentRegion }) {
-      return citiesOfCurrentRegion;
+    getCurrentLat({currentLat}) {
+      return currentLat
     },
+    getCurrentLong({currentLong}) {
+      return currentLong
+    },
+    getCurrentCityName({currentCityName}) {
+      return currentCityName
+    }
   },
   mutations: {
     SET_CURRENT_GEOLOCATION(state, coords) {
-      state.currentLat = coords.latitude;
-      state.currentLong = coords.longitude;
+      state.currentLat = coords.lat;
+      state.currentLong = coords.lon;
+    },
+    SET_CURRENT_CITY_NAME(state, name) {
+      state.currentCityName = name;
     },
     SET_WEATHER_DATA(state, data) {
       state.weatherData = serializeResponseCurrentWeather(data);
@@ -46,20 +50,6 @@ const weatherStore = {
     SET_DAILY_WEATHER_DATA(state, data) {
       state.dailyweatherData = serializeResponseDailyWeather(data);
     },
-    SET_CURRENT_REGION(state, region) {
-      state.currentRegion = region;
-      console.log(state.currentRegion);
-      localStorage.setItem("region", JSON.stringify(region))
-    },
-    SET_CITIES_OF_CURRENT_REGION(state, cities) {
-      state.citiesOfCurrentRegion = cities;
-      console.log(state.citiesOfCurrentRegion);
-    },
-    SET_WEATHER_DATA_IN_CITIES_OF_REGION(state, data) {
-      state.weatherInCitiesOfRegion.push(serializeResponseCurrentWeather(data));
-      console.log(state.weatherInCitiesOfRegion);
-      localStorage.setItem("city", JSON.stringify(state.weatherInCitiesOfRegion))
-    },
   },
   actions: {
     getCurrentGeolocation({ commit, dispatch, state }) {
@@ -67,8 +57,8 @@ const weatherStore = {
 
       function success(position) {
         let coords = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
         };
         commit("SET_CURRENT_GEOLOCATION", coords);
         dispatch("fetchWeatherData", {
@@ -83,20 +73,6 @@ const weatherStore = {
             },
           },
           mutation: "SET_WEATHER_DATA",
-        });
-        dispatch("fetchWeatherData", {
-          url: `${state.apiBase}onecall`,
-          params: {
-            params: {
-              lat: state.currentLat,
-              lon: state.currentLong,
-              exclude: "hourly,alerts,minutely",
-              units: "metric",
-              APPID: state.apiKey,
-              lang: "ru",
-            },
-          },
-          mutation: "SET_DAILY_WEATHER_DATA",
         });
       }
 
@@ -117,20 +93,6 @@ const weatherStore = {
           },
           mutation: "SET_WEATHER_DATA",
         });
-        dispatch("fetchWeatherData", {
-          url: `${state.apiBase}onecall`,
-          params: {
-            params: {
-              lat: 0,
-              lon: 0,
-              exclude: "hourly,alerts,minutely",
-              units: "metric",
-              APPID: state.apiKey,
-              lang: "ru",
-            },
-          },
-          mutation: "SET_DAILY_WEATHER_DATA",
-        });
       }
     },
     async fetchWeatherData({ commit }, { url, params, mutation }) {
@@ -138,41 +100,21 @@ const weatherStore = {
         const response = await axios.get(url, params);
         commit(mutation, response.data);
         commit("SET_ERROR", false);
+        if (response.data.coord) {
+          commit("SET_CURRENT_GEOLOCATION", response.data.coord);
+          localStorage.setItem("lat", JSON.stringify(response.data.coord.lat))
+          localStorage.setItem("lon", JSON.stringify(response.data.coord.lon))
+        }
+        console.log(response.data.name)
+        if (response.data.name) {
+          commit("SET_CURRENT_CITY_NAME", response.data.name);
+          localStorage.setItem("city-name", response.data.name)
+        }
       } catch (error) {
         console.log(error);
         commit("SET_ERROR", true);
         commit(mutation, {});
       }
-    },
-    getCurrentRegion({ commit, state, dispatch }) {
-      if (state.weatherInCitiesOfRegion.length) return;
-      let currentCityName = state.weatherData.city;
-      let currentCityInfo = citiesInfo.filter(
-        (city) => city.name === currentCityName
-      );
-      let currentRegion = currentCityInfo[0].subject;
-      
-      commit("SET_CURRENT_REGION", currentRegion);
-      let citiesOfCurrentRegion = citiesInfo.filter(
-        (city) => city.subject === currentRegion
-      );
-      commit("SET_CITIES_OF_CURRENT_REGION", citiesOfCurrentRegion);
-      citiesOfCurrentRegion.forEach((city) => {
-        dispatch("fetchWeatherData", {
-          url: `${state.apiBase}weather`,
-          params: {
-            params: {
-              q: city.name,
-              units: "metric",
-              APPID: state.apiKey,
-              lang: "ru",
-            },
-          },
-          mutation: "SET_WEATHER_DATA_IN_CITIES_OF_REGION",
-        });
-      });
-      console.log(state.weatherInCitiesOfRegion)
-      
     },
   },
 };

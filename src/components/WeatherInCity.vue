@@ -1,16 +1,7 @@
 <template>
   <div class="weather-in-city container">
-    <AlertMsg :msg="alertMsgSucces" :msg-color="colorMsgSucces" v-if="showAlertSucces"/>
-    <AlertMsg :msg="alertMsgError" :msg-color="colorMsgError" v-if="showAlertError"/>
     <div class="weather-in-city__card card">
       <div class="weather-in-city__body card-body">
-        <div v-show="authorized">
-          <div class="d-flex justify-content-end">
-            <b-button @click="addCityToFavourite" variant="light" size="sm" class="weather-in-city__favourite-btn"
-              >В избранное</b-button
-            >
-          </div>
-        </div>
         <h2 class="card-title">{{ getWeatherData.city }}</h2>
         <p class="card-text">Текущие дата и время: {{ time }}</p>
         <div class="div d-flex align-items-center justify-content-center">
@@ -32,60 +23,22 @@
         </li>
       </ul>
     </div>
-    <DailyWeather />
-    <DayLenght />
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
-import DailyWeather from "./DailyWeather.vue";
-import DayLenght from "./DayLenght.vue";
-import AlertMsg from "./AlertMsg.vue"
+import { mapGetters } from "vuex";
 
 export default {
   name: "WeatherInCity",
   components: {
-    DailyWeather,
-    DayLenght,
-    AlertMsg
   },
   data: () => ({
-    time: new Date().toLocaleString(),
-    showAlertSucces: false,
-    showAlertError: false,
-    alertMsgSucces: "Добавлено в избранное",
-    colorMsgSucces: "background-color: rgb(175, 238, 197)",
-    alertMsgError: "Данный город уже добавлен в избранное",
-    colorMsgError: "background-color: rgb(238, 175, 175)",
+    time: new Date().toLocaleString()
   }),
   computed: {
-    ...mapGetters("weather", ["getWeatherData", "getWeatherInCitiesOfRegion"]),
-    ...mapGetters("auth", ["authorized"]),
-    ...mapGetters("favourite", ["getFavouriteCitiesList"]),
-  },
-  methods: {
-    ...mapActions("favourite", ["addCityInFavourite"]),
-    ...mapActions("weather", ['getCurrentRegion']),
-    async addCityToFavourite() {
-      let currentCity = this.getWeatherData.city;
-      let currentCityData = this.getWeatherInCitiesOfRegion.filter(el => el.city === currentCity);
-      let cityId = currentCityData[0].id;
-      try {
-        await this.addCityInFavourite({
-          id: cityId,
-          name: this.getWeatherData.city,
-          api_city_id: this.getWeatherData.id,
-        });
-        this.showAlertSucces = true;
-        setTimeout(() => {this.showAlertSucces = false}, 2500)
-      } catch (error) {
-        console.log(error);
-        this.showAlertError = true;
-        setTimeout(() => {this.showAlertError = false}, 2500);
-      }
-    },
-  },
+    ...mapGetters("weather", ["getWeatherData"])
+  }
 };
 </script>
 

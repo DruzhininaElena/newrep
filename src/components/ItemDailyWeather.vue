@@ -42,10 +42,6 @@ export default {
 .weather-daily__temp {
   font-size: 40px;
 }
-.card-img-top {
-  height: 70px;
-  width: 70px;
-}
 .weather-daily__humidity-value {
   margin-left: 10px;
 }

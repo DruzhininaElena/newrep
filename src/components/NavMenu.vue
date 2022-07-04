@@ -24,32 +24,18 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-              <a class="nav-link" href="#">Прогноз на неделю</a>
-              <a class="nav-link" href="#">Прогноз на месяц</a>
-              <router-link :to="{ path: '/favourite' }">
-                <a class="nav-link" href="#" v-show="authorized">Избранное</a>
+              <router-link :to="{ path: '/daily' }">
+                <a class="nav-link">Прогноз на неделю</a>
               </router-link>
-              <router-link :to="{ path: '/cities' }">
-                <a class="nav-link" @click="getCurrentRegion" href="#"
-                  >Города региона
-                </a>
+              <router-link :to="{ path: '/day-length' }">
+                <a class="nav-link">Световой день</a>
               </router-link>
             </div>
           </div>
-          <div class="navbar-nav d-flex align-items-center " v-if="!authorized">
-            <LogInIcon size="1.1x"></LogInIcon>
-            <router-link :to="{ path: '/registration' }">
-              <a class="nav-link" href="#">Регистрация</a>
-            </router-link>
-            <!-- <span>|</span> -->
-            <router-link :to="{ path: '/autorization' }">
-              <a class="nav-link" href="#">Вход</a>
-            </router-link>
-          </div>
-          <div class="navbar-nav d-flex align-items-center" v-else>
-            <LogOutIcon size="1.1x"></LogOutIcon>
-            <a @click="onLogOut" class="nav-link" href="#">Выйти</a>
-          </div>
+          <form class="form-inline search">
+            <input v-model.trim="searchValue" class="form-control mr-sm-2" type="search" placeholder="Поиск города" aria-label="Search">
+            <button @click.prevent="search"  class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
+          </form>
         </div>
       </nav>
     </header>
@@ -57,50 +43,66 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapMutations } from "vuex";
-import { LogOutIcon, LogInIcon } from "vue-feather-icons";
+import { mapActions, mapState, mapGetters } from "vuex"
 
 export default {
   name: "NavMenu",
   components: {
-    LogOutIcon,
-    LogInIcon,
   },
+  data: () => ({
+    searchValue: ''
+  }),
   computed: {
-    ...mapGetters("auth", ["authorized"]),
+    ...mapState("weather", ["apiBase", "apiKey"]),
+    ...mapGetters("weather", ["getCurrentLat", "getCurrentLong"])
   },
   methods: {
-    ...mapActions("weather", ["getCurrentRegion"]),
-    ...mapActions("auth", ["logout"]),
-    ...mapActions("favourite", ["fetchFavouriteCities"]),
-    ...mapMutations("auth", ["SET_IS_AUTHORIZED"]),
-    onLogOut() {
-      // this.logout();
-      this.SET_IS_AUTHORIZED(false);
-      localStorage.removeItem("authorization");
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("city");
-      if (this.$route.path !== "/") {
-        this.$router.push("/");
-      }
+    ...mapActions("weather", ["fetchWeatherData"]),
+    search() {
+      this.fetchWeatherData({
+        url: `${this.apiBase}weather`,
+        params: {
+          params: {
+            q: this.searchValue,
+            units: "metric",
+            APPID: this.apiKey,
+            lang: "ru",
+          },
+        },
+        mutation: "SET_WEATHER_DATA",
+      })
+      this.fetchWeatherData({
+        url: `${this.apiBase}onecall`,
+        params: {
+          params: {
+            lat: this.getCurrentLat,
+            lon: this.getCurrentLong,
+            exclude: "hourly,alerts,minutely",
+            units: "metric",
+            APPID: this.apiKey,
+            lang: "ru",
+          },
+        },
+        mutation: "SET_DAILY_WEATHER_DATA",
+      });
+      this.searchValue = ''
     }
   },
 };
 </script>
 
 <style scoped>
-a {
-  text-decoration: none;
-}
-.navbar {
-  background-color: white;
-}
-.header__logo {
-  width: 30px;
-  height: 30px;
-}
-.autorization {
-  display: flex;
-  justify-content: flex-end;
-}
+  a {
+    text-decoration: none;
+  }
+  .navbar {
+    background-color: white;
+  }
+  .header__logo {
+    width: 30px;
+    height: 30px;
+  }
+  .search {
+    display: flex;
+  }
 </style>

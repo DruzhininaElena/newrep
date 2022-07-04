@@ -1,12 +1,9 @@
 import Vue from "vue";
 import Router from "vue-router";
-import WeatherInCity from "../components/WeatherInCity";
-import CitiesList from "../components/CitiesList";
-import Login from "../components/Login";
-import Register from "../components/Register";
-import FavouriteCities from "../components/FavouriteCities"
+import WeatherInCity from "@/components/WeatherInCity";
+import DailyWeather from "@/components/DailyWeather";
+import DayLenght from "@/components/DayLenght";
 Vue.use(Router);
-
 
 const router = new Router({
   mode: "history",
@@ -16,27 +13,18 @@ const router = new Router({
       path: "/",
       name: "weatherInCity",
       component: WeatherInCity
-    }, 
-    {
-      path: "/cities",
-      name: "citiesList",
-      component: CitiesList
     },
     {
-      path: "/autorization",
-      name: "autorization",
-      component: Login
+      path: "/daily",
+      name: "daily",
+      component: DailyWeather
     },
     {
-      path: "/registration",
-      name: "registration",
-      component: Register
-    },
-    {
-      path: "/favourite",
-      name: "favourite",
-      component: FavouriteCities
+      path: "/day-length",
+      name: "day-length",
+      component: DayLenght
     }
+
   ]
 });
 
